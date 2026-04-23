@@ -1,4 +1,6 @@
-
+import TaskInput from "./components/TaskInput";
+import TaskList from "./components/TaskList";
+import FilterButtons from "./components/FilterButtons";
 import { useState, useEffect } from "react";
 
 function App() {
@@ -8,7 +10,7 @@ function App() {
     return saved ? JSON.parse(saved) : [];
   })
   const [filter, setFilter] = useState("all");
-
+  const [search, setSearch] = useState("");
 
 
 
@@ -17,92 +19,55 @@ function App() {
     localStorage.setItem("tasks", JSON.stringify(tasks));
   }, [tasks]);
 
-  const toggleTask = (index) => {
-    const newTasks = tasks.map((t, i) =>
-      i === index ? { ...t, completed: !t.completed } : t
+  const toggleTask = (taksToDelete) => {
+    const newTasks = tasks.map((t) =>
+      t === taksToDelete ? { text: t.text, completed: !t.completed } : t
     );
     setTasks(newTasks);
   };
 
-
+  const addTask = () => {
+    console.log("clicked"); // 👈 check this
+    if(task.trim() === "") return;
+    setTasks([...tasks, {text: task, completed: false}]);
+    setTask("");
+  }
+  const deleteTask = (taskToDelete) =>{
+    setTasks(tasks.filter((t)=> t!== taskToDelete));
+  }
   const filteredTasks = tasks.filter((t) => {
-    if (filter === "completed") return t.completed;
-    if (filter === "pending") return !t.completed;
-    return true;
+    const matchesFilter = 
+    filter === "all" ||
+    (filter === "completed" && t.completed) ||
+    (filter === "pending" && !t.completed);
+
+    const matchesSearch = 
+      t.text.toLowerCase().includes(search.toLowerCase());
+    
+    return matchesFilter && matchesSearch;
   });
 
 
   return (
     <div className="container">
-      <h1>
-        To-Do App
-      </h1>
+      <h1>To-Do App</h1>
 
+      <TaskInput task={task} setTask={setTask} addTask={addTask} />
+      
       <input
-        value={task}
-        onChange={(e) => setTask(e.target.value)}
-        placeholder="enter task"
+                value={search}
+                onChange={(e)=>setSearch(e.target.value)}
+                placeholder="search tasks..."
+            />
+      <FilterButtons filter= {filter} setFilter={setFilter} />
+
+      <TaskList
+        tasks={filteredTasks}
+        toggleTask={toggleTask}
+        deleteTask={deleteTask}
       />
 
-      <button onClick={() => {
-        if (task.trim() === "") return;
-        setTasks([...tasks, { text: task, completed: false }]);
-        setTask("");
-      }}>
-        Add
-      </button>
-
-      <div>
-        <button onClick={() => setFilter("all")}
-          style = {{
-            background: filter === "all" ? "black" :  "", color: filter === "all" ? "white" : ""
-          }}
-        > 
-          All 
-          </button>
-        <button 
-          onClick={() => setFilter("completed")}
-          style = {{ background: filter === "completed" ? "black" : "" , color: filter === "completed" ? "white" : "" }}
-          >
-            completed</button>
-        <button 
-          onClick={() => setFilter("pending")}
-          style={{background: filter === "pending" ? "black" : "", color: filter === "pending" ? "white" : "" }}
-        >
-          pending
-        </button>
-        <button onClick={()=>{
-          if(window.confirm("are you sure?")){
-            setTasks([]);
-            }
-          }}>
-          Clear All
-        </button>
-      </div>
       
-
-      <ul>
-        {filteredTasks.map((t, index) => (
-          <li key={index}>
-            <span
-              onClick={() => toggleTask(index)}
-              style={{
-                textDecoration: t.completed ? "line-through" : "none",
-                color: t.completed ? "gray" : "black"
-              }}
-            >
-              {t.text}
-            </span>
-
-            <button onClick={() => {
-              const newTasks = tasks.filter((item) => item !== t);
-              setTasks(newTasks);
-            }}>
-              delete
-            </button>
-          </li>
-        ))}
-      </ul>
     </div>
   )
 }
