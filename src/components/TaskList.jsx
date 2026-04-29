@@ -16,7 +16,11 @@ function TaskList({
                     <p className="text-sm">Start by adding a new task</p>
                 </div>
             )}
-
+            {tasks.length !== 0 && (
+                <h2 className="text-xl font-semibold mb-4 text-gray-700">
+                    Your Tasks
+                </h2>
+            )}
             <ul className="mt-4">
                 {tasks.map((t, index) => (
                     <li key={index}>
