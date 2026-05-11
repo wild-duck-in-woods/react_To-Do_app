@@ -1,5 +1,5 @@
 function TaskList({
-    tasks,
+    tasks=[],
     toggleTask,
     deleteTask,
     startEdit,
@@ -8,6 +8,8 @@ function TaskList({
     setEditText,
     saveEdit
 }) {
+
+
     return (
         <>
             {tasks.length === 0 && (
@@ -54,7 +56,11 @@ function TaskList({
 
                                         <button
                                             className="text-red-500 hover:underline"
-                                            onClick={() => deleteTask(index)}
+                                            onClick={() => {
+                                                console.log(t.id);
+                                                deleteTask(t.id);
+                                            }
+                                            }
                                         >
                                             Delete
                                         </button>

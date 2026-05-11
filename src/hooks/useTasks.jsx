@@ -1,64 +1,130 @@
 import { useState, useEffect } from "react";
 
 function useTasks() {
+  const token = localStorage.getItem("token");
+
   const [task, setTask] = useState("");
-  const [tasks, setTasks] = useState(() => {
-    const saved = localStorage.getItem("tasks");
-    return saved ? JSON.parse(saved) : [];
-  });
+
+  const [tasks, setTasks] = useState([]);
 
   const [filter, setFilter] = useState("all");
+
   const [search, setSearch] = useState("");
+
   const [editingIndex, setEditingIndex] = useState(null);
+
   const [editText, setEditText] = useState("");
 
-  // Save to localStorage
+  //-----------------------------------------------------------------
+  // fetch tasks from server
+  //-----------------------------------------------------------
   useEffect(() => {
-    localStorage.setItem("tasks", JSON.stringify(tasks));
-  }, [tasks]);
+    fetch("http://localhost:5000/tasks", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        setTasks(data);
+      })
+      .catch((err) => console.log(err));
+  }, []);
 
-  // Add Task
-  const addTask = () => {
+  const addTask = async () => {
     if (!task.trim()) return;
 
-    setTasks([
-      ...tasks,
-      {
-        text: task,
-        completed: false,
-        date: new Date().toLocaleString(),
+    const newTask = {
+      id: Date.now().toString(),
+      text: task,
+      completed: false,
+      date: new Date().toLocaleString(),
+    };
+
+    const res = await fetch("http://localhost:5000/tasks", {
+      method: "POST",
+
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
       },
-    ]);
+
+      body: JSON.stringify(newTask),
+    });
+
+    const data = await res.json();
+
+    setTasks((prev) => [...prev, data]);
 
     setTask("");
   };
 
-  // Toggle Task
-  const toggleTask = (index) => {
+  //-------------------------------------------------------------------
+  // toggle task
+  //------------------------------------------------------------------
+
+  const toggleTask = async (task) => {
+    const updatedTask = {
+      ...task,
+      completed: !task.completed,
+    };
+
+    await fetch(`http://localhost:5000/tasks/${task.id}`, {
+      method: "PUT",
+
+      headers: {
+  "Content-Type": "application/json",
+  Authorization: `Bearer ${token}`,
+},
+
+      body: JSON.stringify(updatedTask),
+    });
+
     setTasks((prev) =>
-      prev.map((t, i) =>
-        i === index ? { ...t, completed: !t.completed } : t
+      prev.map((t) =>
+        t.id === task.id ? updatedTask : t
       )
     );
   };
 
-  // Delete Task
-  const deleteTask = (index) => {
-    setTasks((prev) => prev.filter((_, i) => i !== index));
+  const deleteTask = async (id) => {
+    //if(!id) return;
+    await fetch(`http://localhost:5000/tasks/${id}`, {
+      method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    setTasks((prev) =>
+      prev.filter((t) => t.id !== id)
+    );
   };
 
-  // Edit Task
   const startEdit = (index, text) => {
     setEditingIndex(index);
     setEditText(text);
   };
 
-  const saveEdit = (index) => {
-    if (!editText.trim()) return;
+  const saveEdit = async (index) => {
+    const updatedTask = {
+      ...task,
+      text: editText,
+    };
+
+    await fetch(`http://localhost:5000/tasks/${task.id}`, {
+      method: "PUT",
+
+      headers: {
+        "Content-Type": "application/json",
+      },
+
+      body: JSON.stringify(updatedTask),
+    });
 
     setTasks((prev) =>
-      prev.map((t, i) =>
-        i === index ? { ...t, text: editText } : t
+      prev.map((t) =>
+        t.id === task.id ? updatedTask : t
       )
     );
 
@@ -66,33 +132,42 @@ function useTasks() {
     setEditText("");
   };
 
-  // Filter + Search
-  const filteredTasks = tasks
-    .filter((t) => {
-      if (filter === "completed") return t.completed;
-      if (filter === "pending") return !t.completed;
-      return true;
-    })
-    .filter((t) =>
-      t.text.toLowerCase().includes(search.toLowerCase())
-    );
+  const filteredTasks = tasks.filter((t) => {
+    const matchesFilter =
+      filter === "all" ||
+      (filter === "completed" && t.completed) ||
+      (filter === "pending" && !t.completed);
+
+    const matchesSearch =
+      t.text.toLowerCase().includes(search.toLowerCase());
+
+    return matchesFilter && matchesSearch;
+  });
 
   return {
     task,
     setTask,
+
     tasks,
+    setTasks,
+
     filter,
     setFilter,
+
     search,
     setSearch,
+
     editingIndex,
+
     editText,
     setEditText,
+
     addTask,
     toggleTask,
     deleteTask,
     startEdit,
     saveEdit,
+
     filteredTasks,
   };
 }

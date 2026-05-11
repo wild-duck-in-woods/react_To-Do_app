@@ -1,48 +1,74 @@
 import { useState } from "react";
 
-function Signup({onSignup}){
+function Signup({ setIsLogin }) {
     const [email, setEmail] = useState("")
     const [password, setPassword] = useState("");
 
-    const handleSignup = (e) =>{
-        e.preventDefault();
+    const signupUser = async () => {
+        const res = await fetch(
+            "http://localhost:5000/signup",
+            {
+                method: "POST",
 
-        const existingUsers = JSON.parse(localStorage.getItem("users")) || [];
+                headers: {
+                    "Content-Type": "application/json",
+                },
 
-        const newUser = {email, password};
+                body: JSON.stringify({
+                    email,
+                    password,
+                }),
+            }
+        )
+        const data = await res.json();
+        alert(data.message);
 
-        existingUsers.push(newUser);
-
-        localStorage.setItem("users", JSON.stringify(existingUsers));
-
-        onSignup(email);
+        if (data.message === "signup successful") {
+            setIsLogin(true);
+        }
     };
+return (
+    <div className="p-10 flex flex-col gap-4 max-w-sm mx-auto">
 
-    return (
-        <form onSubmit={handleSignup} className="bg-white p-6 rounded shadow w-80">
-            <h2 className="text-xl text-center mb-4"> signup</h2>
+      <h1 className="text-2xl font-bold">
+        Signup
+      </h1>
 
-            <input
-                className="w-full border p-2 mb-2"
-                type="text"
-                placeholder="email"
-                value={email}
-                onChange={(e)=>setEmail(e.target.value)}
-            />
+      <input
+        type="email"
+        placeholder="Email"
+        value={email}
+        onChange={(e) =>
+          setEmail(e.target.value)
+        }
+        className="border p-2 rounded"
+      />
 
-            <input
-                className="w-full border p-2 mb-2"
-                type="password"
-                placeholder="password"
-                value="password"
-                onChange={(e)=>setPassword(e.target.value)}
-            />
+      <input
+        type="password"
+        placeholder="Password"
+        value={password}
+        onChange={(e) =>
+          setPassword(e.target.value)
+        }
+        className="border p-2 rounded"
+      />
 
-            <button className="w-full bg-green-500 text-white p-2 rounded">
-                signup
-            </button>
-        </form>
-    );
+      <button
+        onClick={signupUser}
+        className="bg-green-500 text-white p-2 rounded"
+      >
+        Signup
+      </button>
+
+      <p
+        onClick={() => setIsLogin(true)}
+        className="text-blue-500 cursor-pointer"
+      >
+        Already have an account?
+      </p>
+
+    </div>
+  );
 }
-
 export default Signup;
