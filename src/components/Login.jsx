@@ -1,53 +1,81 @@
 import { useState } from "react";
 
-function Login({setIsLogin}){
-    const [email,setEmail] = useState("");
-    const [password, setPassword] = useState("");
+function Login({ setIsLogin }) {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
-    const loginUser= async ()=>{
-        const res= await fetch(
-            "http://localhost:5000/login",
-            {
-                method: "POST",
+  const loginUser = async () => {
+    try {
+      const res = await fetch(
+        "http://localhost:5000/login",
+        {
+          method: "POST",
 
-                headers:{
-                    "Content-Type":"application/json",
-                },
+          headers: {
+            "Content-Type": "application/json",
+          },
 
-                body:JSON.stringify({
-                    email,
-                    password,
-                }),
-            }
+          body: JSON.stringify({
+            email,
+            password,
+          }),
+        }
+      );
+      const data = await res.json();
+
+      console.log(data);
+
+      if (data.token) {
+        localStorage.setItem(
+          "token",
+          data.token
         );
 
-        const data= await res.json();
+        window.location.reload();
+      } else {
+        alert(data.message);
+      }
 
-        console.log(data);
 
-        if(data.token){
-            localStorage.setItem(
-                "token",
-                data.token
-            );
-            
-            alert("login successful");
-        } else{
-            alert(data.message);
+    } catch (err) {
+      console.log(err);
+    }
+  }
+  const signupUser = async () => {
+    try {
+      const res = await fetch(
+        "http://localhost:5000/signup",
+        {
+          method: "POST",
+
+          headers: {
+            "Content-Type": "application/json",
+          },
+
+          body: JSON.stringify({
+            email,
+            password,
+          }),
         }
-    } 
-    return (
-    <div className="p-10 flex flex-col gap-4 max-w-sm mx-auto">
+      );
+      const data = await res.json();
 
-      <h1 className="text-2xl font-bold">
-        Login
-      </h1>
-        <p
-  onClick={() => setIsLogin(false)}
-  className="text-blue-500 cursor-pointer"
->
-  Create account
-</p>
+      console.log(data);
+
+        alert(data.message);
+
+
+
+    } catch (err) {
+      console.log(err);
+    }
+  }
+
+  return (
+    <div style={{ padding: 40 }}>
+
+      <h1>Login</h1>
+
       <input
         type="email"
         placeholder="Email"
@@ -55,9 +83,10 @@ function Login({setIsLogin}){
         onChange={(e) =>
           setEmail(e.target.value)
         }
-        className="border p-2 rounded"
       />
 
+      <br />
+      <br />
       <input
         type="password"
         placeholder="Password"
@@ -65,18 +94,23 @@ function Login({setIsLogin}){
         onChange={(e) =>
           setPassword(e.target.value)
         }
-        className="border p-2 rounded"
       />
 
-      <button
-        onClick={loginUser}
-        className="bg-blue-500 text-white p-2 rounded"
-      >
+      <br />
+      <br />
+
+      <button onClick={loginUser}>
         Login
+      </button>
+
+      <br />
+      <br />
+
+      <button onClick={signupUser}>
+        Signup
       </button>
 
     </div>
   );
 }
-
 export default Login;

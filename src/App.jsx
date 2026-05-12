@@ -4,25 +4,13 @@ import TodoApp from "./components/TodoApp";
 import Signup from "./components/Signup";
 
 function App(){
-  const token = localStorage.getItem("token");
-  const [isLogin, setIsLogin] = useState(true);
+  const token =
+    localStorage.getItem("token");
 
-  if(token){
-    return <TodoApp />;
-  }
-
-  return(
+  return (
     <>
-    
-      {
-        isLogin?(
-          <Login setIsLogin={setIsLogin} />
-        ) : (
-          <Signup setIsLogin={setIsLogin} />
-        )
-      }
+      {token ? <TodoApp /> : <Login />}
     </>
-  )
+  ); 
 }
-
 export default App;

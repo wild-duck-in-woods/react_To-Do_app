@@ -26,12 +26,34 @@ function useTasks() {
     })
       .then((res) => res.json())
       .then((data) => {
-        setTasks(data);
+        console.log("FETCH:", data);
+
+        if (Array.isArray(data)) {
+          setTasks(data);
+        } else {
+          setTasks([]);
+
+          if (
+            data.message === "invalid token" ||
+            data.message === "no token provided"
+          ) {
+            localStorage.removeItem("token");
+
+            window.location.reload();
+          }
+        }
+        //setTasks(data);
       })
-      .catch((err) => console.log(err));
+      .catch((err) => {
+        console.log(err);
+
+        setTasks([]);
+      })
   }, []);
 
   const addTask = async () => {
+
+
     if (!task.trim()) return;
 
     const newTask = {
@@ -54,7 +76,11 @@ function useTasks() {
 
     const data = await res.json();
 
-    setTasks((prev) => [...prev, data]);
+    setTasks((prev) =>
+      Array.isArray(prev)
+        ? [...prev, data]
+        : [data]
+    );
 
     setTask("");
   };
@@ -73,17 +99,21 @@ function useTasks() {
       method: "PUT",
 
       headers: {
-  "Content-Type": "application/json",
-  Authorization: `Bearer ${token}`,
-},
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
 
       body: JSON.stringify(updatedTask),
     });
 
     setTasks((prev) =>
-      prev.map((t) =>
-        t.id === task.id ? updatedTask : t
-      )
+      Array.isArray(prev)
+        ? prev.map((t) =>
+          t.id === task.id
+            ? updatedTask
+            : t
+        )
+        : []
     );
   };
 
@@ -97,7 +127,9 @@ function useTasks() {
     });
 
     setTasks((prev) =>
-      prev.filter((t) => t.id !== id)
+      Array.isArray(prev)
+      ?  prev.filter((t) => t.id !== id)
+      : []
     );
   };
 
@@ -132,17 +164,23 @@ function useTasks() {
     setEditText("");
   };
 
-  const filteredTasks = tasks.filter((t) => {
-    const matchesFilter =
-      filter === "all" ||
-      (filter === "completed" && t.completed) ||
-      (filter === "pending" && !t.completed);
+  const filteredTasks = Array.isArray(tasks)
+    ? tasks.filter((t) => {
 
-    const matchesSearch =
-      t.text.toLowerCase().includes(search.toLowerCase());
+      //safety check
+      if(!t || !t.text) return false;
+      
+      const matchesFilter =
+        filter === "all" ||
+        (filter === "completed" && t.completed) ||
+        (filter === "pending" && !t.completed);
 
-    return matchesFilter && matchesSearch;
-  });
+      const matchesSearch =
+        t.text.toLowerCase().includes(search.toLowerCase());
+
+      return matchesFilter && matchesSearch;
+    })
+    : [];
 
   return {
     task,

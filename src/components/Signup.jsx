@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-function Signup({ setIsLogin }) {
+function Signup({ }) {
     const [email, setEmail] = useState("")
     const [password, setPassword] = useState("");
 
