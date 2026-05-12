@@ -34,13 +34,13 @@ function TaskList({
                                         value={editText}
                                         onChange={(e) => setEditText(e.target.value)}
                                     />
-                                    <button onClick={() => saveEdit(index)}>Save</button>
+                                    <button onClick={() => saveEdit(t)}>Save</button>
                                 </>
                             ) : (
                                 <>
                                     <div>
                                     <p 
-                                        onClick={() => toggleTask(index)}
+                                        onClick={() => toggleTask(t)}
                                         className={`cursor-pointer ${t.completed ? "line-through text-gray-400" : " text-gray-800"
                                             }`}
                                     >
@@ -57,7 +57,7 @@ function TaskList({
                                         <button
                                             className="text-red-500 hover:underline"
                                             onClick={() => {
-                                                console.log(t.id);
+                                                //console.log(t.id);
                                                 deleteTask(t.id);
                                             }
                                             }

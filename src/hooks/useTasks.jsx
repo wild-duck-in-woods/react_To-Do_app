@@ -138,7 +138,8 @@ function useTasks() {
     setEditText(text);
   };
 
-  const saveEdit = async (index) => {
+
+const saveEdit = async (task) => {
     const updatedTask = {
       ...task,
       text: editText,
@@ -149,20 +150,27 @@ function useTasks() {
 
       headers: {
         "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
       },
 
       body: JSON.stringify(updatedTask),
     });
 
     setTasks((prev) =>
-      prev.map((t) =>
-        t.id === task.id ? updatedTask : t
-      )
+      Array.isArray(prev)
+        ? prev.map((t) =>
+          t.id === task.id
+            ? updatedTask
+            : t
+        )
+        : []
     );
 
     setEditingIndex(null);
     setEditText("");
   };
+
+
 
   const filteredTasks = Array.isArray(tasks)
     ? tasks.filter((t) => {
