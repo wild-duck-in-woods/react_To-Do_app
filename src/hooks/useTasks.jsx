@@ -57,7 +57,6 @@ function useTasks() {
     if (!task.trim()) return;
 
     const newTask = {
-      id: Date.now().toString(),
       text: task,
       completed: false,
       date: new Date().toLocaleString(),
@@ -95,7 +94,7 @@ function useTasks() {
       completed: !task.completed,
     };
 
-    await fetch(`http://localhost:5000/tasks/${task.id}`, {
+    await fetch(`http://localhost:5000/tasks/${task._id}`, {
       method: "PUT",
 
       headers: {
@@ -109,7 +108,7 @@ function useTasks() {
     setTasks((prev) =>
       Array.isArray(prev)
         ? prev.map((t) =>
-          t.id === task.id
+          t._id === task._id
             ? updatedTask
             : t
         )
@@ -118,21 +117,30 @@ function useTasks() {
   };
 
   const deleteTask = async (id) => {
-    //if(!id) return;
-    await fetch(`http://localhost:5000/tasks/${id}`, {
-      method: "DELETE",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
 
-    setTasks((prev) =>
-      Array.isArray(prev)
-      ?  prev.filter((t) => t.id !== id)
-      : []
-    );
-  };
+    try {
 
+        const response = await fetch(
+            `http://localhost:5000/tasks/${id}`,
+            {
+                method: "DELETE",
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            }
+        )
+
+        console.log(await response.json())
+
+        setTasks((prev) =>
+            prev.filter((task) => task._id !== id)
+        )
+
+    } catch (err) {
+
+        console.log(err)
+    }
+}
   const startEdit = (index, text) => {
     setEditingIndex(index);
     setEditText(text);
@@ -145,7 +153,7 @@ const saveEdit = async (task) => {
       text: editText,
     };
 
-    await fetch(`http://localhost:5000/tasks/${task.id}`, {
+    await fetch(`http://localhost:5000/tasks/${task._id}`, {
       method: "PUT",
 
       headers: {
@@ -159,7 +167,7 @@ const saveEdit = async (task) => {
     setTasks((prev) =>
       Array.isArray(prev)
         ? prev.map((t) =>
-          t.id === task.id
+          t._id === task._id
             ? updatedTask
             : t
         )

@@ -25,7 +25,7 @@ function TaskList({
             )}
             <ul className="mt-4">
                 {tasks.map((t, index) => (
-                    <li key={index}>
+                    <li key={t._id}>
                         <div className="bg-white p-4 rounded-xl shadow-sm mb-3 flex justify-between items-center hove:shadow-md transition">
 
                             {editingIndex === index ? (
@@ -58,7 +58,7 @@ function TaskList({
                                             className="text-red-500 hover:underline"
                                             onClick={() => {
                                                 //console.log(t.id);
-                                                deleteTask(t.id);
+                                            deleteTask(t._id);
                                             }
                                             }
                                         >
