@@ -1,4 +1,17 @@
-const BASE_URL = "http://localhost:5000"
+//const BASE_URL = "http://localhost:5000"
+const BASE_URL =
+   "https://todo-backend-w4ml.onrender.com"
+const getAuthHeaders =
+    (token) => {
+
+        return {
+            "Content-Type":
+                "application/json",
+
+            Authorization:
+                `Bearer ${token}`
+        }
+    }
 
 export const getTasks =
     async (token) => {
@@ -7,12 +20,14 @@ export const getTasks =
             await fetch(
                 `${BASE_URL}/tasks`,
                 {
-                    headers: {
-                        Authorization:
-                            `Bearer ${token}`
-                    }
+                    headers: getAuthHeaders(token),
                 }
             )
+        if (!response.ok) {
+            throw new Error(
+                "Failed to fetch tasks"
+            )
+        }
         return response.json()
     }
 
@@ -25,20 +40,20 @@ export const createTask =
                 {
                     method: "POST",
 
-                    headers: {
-                        "Content-Type":
-                            "application/json",
-                        Authorization:
-                            `Bearer ${token}`,
-                    },
+                    headers: getAuthHeaders(token),
 
                     body: JSON.stringify(newTask),
                 });
+        if (!response.ok) {
 
+            throw new Error(
+                "Failed to fetch tasks"
+            )
+        }
         return response.json();
     }
 
-       
+
 export const deleteTask =
     async (id, token) => {
 
@@ -47,15 +62,16 @@ export const deleteTask =
                 {
                     method: "DELETE",
 
-                    headers: {
-                        "Content-Type":
-                            "application/json",
-                        Authorization:
-                            `Bearer ${token}`,
-                    },
+                    headers: getAuthHeaders(token)
+
 
                 });
+        if (!response.ok) {
 
+            throw new Error(
+                "Failed to fetch tasks"
+            )
+        }
         return response.json();
     }
 
@@ -67,18 +83,18 @@ export const updateTask =
                 {
                     method: "PUT",
 
-                    headers: {
-                        "Content-Type":
-                            "application/json",
-                        Authorization:
-                            `Bearer ${token}`,
-                    },
+                    headers: getAuthHeaders(token),
 
                     body: JSON.stringify(updatedTask),
 
 
                 });
+        if (!response.ok) {
 
+            throw new Error(
+                "Failed to fetch tasks"
+            )
+        }
         return response.json();
     }
 

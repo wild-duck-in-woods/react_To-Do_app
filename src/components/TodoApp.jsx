@@ -32,6 +32,9 @@ function TodoApp({  }) {
         saveEdit,
 
         filteredTasks,
+
+        loading,
+        error,
     } = useTasks();
 
       //console.log(useTasks());
@@ -55,6 +58,8 @@ function TodoApp({  }) {
                 <FilterButtons filter={filter} setFilter={setFilter} />
             </div>
             <TaskList
+                loading={loading}
+                error={error}
                 tasks={filteredTasks}
                 toggleTask={toggleTask}
                 removeTask={removeTask}

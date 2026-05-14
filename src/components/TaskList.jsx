@@ -1,28 +1,55 @@
 function TaskList({
-    tasks=[],
+    tasks = [],
     toggleTask,
     removeTask,
     startEdit,
     editingIndex,
     editText,
     setEditText,
-    saveEdit
+    saveEdit,
+    loading,
+    error,
 }) {
 
 
     return (
         <>
-            {tasks.length === 0 && (
-                <div className="text-center text-gray-500 mt-10">
-                    <p className="text-lg">No tasks found</p>
-                    <p className="text-sm">Start by adding a new task</p>
-                </div>
-            )}
-            {tasks.length !== 0 && (
-                <h2 className="text-xl font-semibold mb-4 text-gray-700">
-                    Your Tasks
-                </h2>
-            )}
+            {loading
+                ?
+                <>
+
+                    <div className="text-center text-gray-500 mt-10">
+                        <p className="text-lg">Loading...</p>
+
+                    </div>
+                </>
+                :
+                <>
+                    {error
+                        ? <div className="text-center text-gray-500 mt-10">
+                            <p className="text-lg">{error}</p>
+
+                        </div>
+
+                        : <>{
+                            tasks.length === 0 && (
+                                <div className="text-center text-gray-500 mt-10">
+                                    <p className="text-lg">No tasks found</p>
+                                    <p className="text-sm">Start by adding a new task</p>
+                                </div>
+                            )}
+
+
+                            {tasks.length !== 0 && (
+                                <h2 className="text-xl font-semibold mb-4 text-gray-700">
+                                    Your Tasks
+                                </h2>
+                            )}
+                        </>
+                    }
+                </>
+                }
+
             <ul className="mt-4">
                 {tasks.map((t, index) => (
                     <li key={t._id}>
@@ -39,13 +66,13 @@ function TaskList({
                             ) : (
                                 <>
                                     <div>
-                                    <p 
-                                        onClick={() => toggleTask(t)}
-                                        className={`cursor-pointer ${t.completed ? "line-through text-gray-400" : " text-gray-800"
-                                            }`}
-                                    >
-                                        {t.text}
-                                    </p>
+                                        <p
+                                            onClick={() => toggleTask(t)}
+                                            className={`cursor-pointer ${t.completed ? "line-through text-gray-400" : " text-gray-800"
+                                                }`}
+                                        >
+                                            {t.text}
+                                        </p>
                                         <p className="text-xs text-gray-400">{t.date}</p>
                                     </div>
 
@@ -58,7 +85,7 @@ function TaskList({
                                             className="text-red-500 hover:underline"
                                             onClick={() => {
                                                 //console.log(t.id);
-                                            removeTask(t._id);
+                                                removeTask(t._id);
                                             }
                                             }
                                         >

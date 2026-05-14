@@ -1,7 +1,7 @@
 import { useState, useEffect, useContext } from "react";
 import { AuthContext } from "../context/AuthContext";
-import { 
-  getTasks ,
+import {
+  getTasks,
   createTask,
   deleteTask,
   updateTask
@@ -10,6 +10,9 @@ import {
 
 function useTasks() {
 
+  const [loading, setLoading] = useState(false)
+
+  const [error, setError] = useState("")
 
   const { token, user } = useContext(AuthContext);
 
@@ -25,9 +28,7 @@ function useTasks() {
 
   const [editText, setEditText] = useState("");
 
-  //-----------------------------------------------------------------
-  // fetch tasks from server
-  //-----------------------------------------------------------
+
   useEffect(() => {
     if (!token) return
 
@@ -35,10 +36,14 @@ function useTasks() {
 
   }, [token])
 
-
+  //-----------------------------------------------------------------
+  // fetch tasks from server
+  //-----------------------------------------------------------
   const fetchTasks = async () => {
 
     try {
+      setLoading(true)
+      setError("")
       const data =
         await getTasks(token)
 
@@ -59,13 +64,19 @@ function useTasks() {
       }
     } catch (err) {
       console.log(err);
-
+      setError(
+        "Failed to load tasks"
+      )
       setTasks([]);
+    } finally{
+      setLoading(false)
     }
   };
 
-
-const addTask = async () => {
+  //-----------------------------------------------------------------
+  // add tasks to list
+  //-----------------------------------------------------------
+  const addTask = async () => {
 
 
     if (!task.trim()) return;
@@ -76,16 +87,24 @@ const addTask = async () => {
       date: new Date().toLocaleString(),
     };
 
-    const data = await createTask(newTask,token)
-    console.log("data is ",data)
+    try {
 
-    setTasks((prev) =>
-      Array.isArray(prev)
-        ? [...prev, data]
-        : [data]
-    );
+      const data = await createTask(newTask, token)
+      console.log("data is ", data)
 
-    setTask("");
+      setTasks((prev) =>
+        Array.isArray(prev)
+          ? [...prev, data]
+          : [data]
+      );
+
+      setTask("");
+    } catch (err) {
+      console.log(err)
+
+
+    }
+
   };
   //-------------------------------------------------------------------
   // toggle task
@@ -96,28 +115,37 @@ const addTask = async () => {
       ...task,
       completed: !task.completed,
     };
+    try {
+      const res = updateTask(updatedTask, token)
 
-    const res= updateTask(updatedTask, token)
+
+      setTasks((prev) =>
+        Array.isArray(prev)
+          ? prev.map((t) =>
+            t._id === task._id
+              ? updatedTask
+              : t
+          )
+          : []
+      );
+
+    } catch (err) {
+      console.log(err)
 
 
-    setTasks((prev) =>
-      Array.isArray(prev)
-        ? prev.map((t) =>
-          t._id === task._id
-            ? updatedTask
-            : t
-        )
-        : []
-    );
+    }
+
   };
-
+  //-----------------------------------------------------------------
+  // delete tasks
+  //-----------------------------------------------------------
   const removeTask = async (id) => {
 
     try {
 
-      
 
-      const response= await deleteTask(id,token)
+
+      const response = await deleteTask(id, token)
 
       console.log(await response)
 
@@ -130,6 +158,10 @@ const addTask = async () => {
       console.log(err)
     }
   }
+  //-----------------------------------------------------------------
+  // edit tasks
+  //-----------------------------------------------------------
+
   const startEdit = (index, text) => {
     setEditingIndex(index);
     setEditText(text);
@@ -142,30 +174,28 @@ const addTask = async () => {
       text: editText,
     };
 
-    // await fetch(`http://localhost:5000/tasks/${task._id}`, {
-    //   method: "PUT",
+    try {
+      const res = await updateTask(updatedTask, token)
+      console.log(res)
+      setTasks((prev) =>
+        Array.isArray(prev)
+          ? prev.map((t) =>
+            t._id === task._id
+              ? updatedTask
+              : t
+          )
+          : []
+      );
 
-    //   headers: {
-    //     "Content-Type": "application/json",
-    //     Authorization: `Bearer ${token}`,
-    //   },
+      setEditingIndex(null);
+      setEditText("");
 
-    //   body: JSON.stringify(updatedTask),
-    // });
-    const res= await updateTask(updatedTask, token)
-    console.log(res)
-    setTasks((prev) =>
-      Array.isArray(prev)
-        ? prev.map((t) =>
-          t._id === task._id
-            ? updatedTask
-            : t
-        )
-        : []
-    );
+    } catch (err) {
+      console.log(err)
 
-    setEditingIndex(null);
-    setEditText("");
+
+    }
+
   };
 
 
@@ -213,6 +243,9 @@ const addTask = async () => {
     saveEdit,
 
     filteredTasks,
+
+    loading,
+    error
   };
 }
 
