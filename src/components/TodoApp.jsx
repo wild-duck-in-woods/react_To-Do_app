@@ -27,7 +27,7 @@ function TodoApp({  }) {
 
         addTask,
         toggleTask,
-        deleteTask,
+        removeTask,
         startEdit,
         saveEdit,
 
@@ -57,7 +57,7 @@ function TodoApp({  }) {
             <TaskList
                 tasks={filteredTasks}
                 toggleTask={toggleTask}
-                deleteTask={deleteTask}
+                removeTask={removeTask}
                 startEdit={startEdit}
                 editingIndex={editingIndex}
                 editText={editText}

@@ -1,7 +1,7 @@
 function TaskList({
     tasks=[],
     toggleTask,
-    deleteTask,
+    removeTask,
     startEdit,
     editingIndex,
     editText,
@@ -58,7 +58,7 @@ function TaskList({
                                             className="text-red-500 hover:underline"
                                             onClick={() => {
                                                 //console.log(t.id);
-                                            deleteTask(t._id);
+                                            removeTask(t._id);
                                             }
                                             }
                                         >

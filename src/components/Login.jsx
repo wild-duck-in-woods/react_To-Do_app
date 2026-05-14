@@ -1,6 +1,15 @@
 import { useState } from "react";
+import { useContext } from "react";
+import { AuthContext } from "../context/AuthContext";
 
 function Login({ setIsLogin }) {
+  const {
+    token,
+    user,
+    login,
+    logout,
+  } = useContext(AuthContext)
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
@@ -23,13 +32,9 @@ function Login({ setIsLogin }) {
       );
       const data = await res.json();
 
-      console.log(data);
 
       if (data.token) {
-        localStorage.setItem(
-          "token",
-          data.token
-        );
+        login(data.token, data.user)
 
         window.location.reload();
       } else {
@@ -41,6 +46,8 @@ function Login({ setIsLogin }) {
       console.log(err);
     }
   }
+
+
   const signupUser = async () => {
     try {
       const res = await fetch(

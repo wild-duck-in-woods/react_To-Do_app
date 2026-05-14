@@ -1,7 +1,17 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
+import { AuthContext } from "../context/AuthContext";
+import { 
+  getTasks ,
+  createTask,
+  deleteTask,
+  updateTask
+
+} from "../services/api";
 
 function useTasks() {
-  const token = localStorage.getItem("token");
+
+
+  const { token, user } = useContext(AuthContext);
 
   const [task, setTask] = useState("");
 
@@ -19,39 +29,43 @@ function useTasks() {
   // fetch tasks from server
   //-----------------------------------------------------------
   useEffect(() => {
-    fetch("http://localhost:5000/tasks", {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        console.log("FETCH:", data);
+    if (!token) return
 
-        if (Array.isArray(data)) {
-          setTasks(data);
-        } else {
-          setTasks([]);
+    fetchTasks()
 
-          if (
-            data.message === "invalid token" ||
-            data.message === "no token provided"
-          ) {
-            localStorage.removeItem("token");
+  }, [token])
 
-            window.location.reload();
-          }
-        }
-        //setTasks(data);
-      })
-      .catch((err) => {
-        console.log(err);
+
+  const fetchTasks = async () => {
+
+    try {
+      const data =
+        await getTasks(token)
+
+      if (Array.isArray(data)) {
+
+        setTasks(data);
+
+      } else {
 
         setTasks([]);
-      })
-  }, []);
 
-  const addTask = async () => {
+        if (
+          data.message === "invalid token" ||
+          data.message === "no token provided"
+        ) {
+          logout();
+        }
+      }
+    } catch (err) {
+      console.log(err);
+
+      setTasks([]);
+    }
+  };
+
+
+const addTask = async () => {
 
 
     if (!task.trim()) return;
@@ -62,18 +76,8 @@ function useTasks() {
       date: new Date().toLocaleString(),
     };
 
-    const res = await fetch("http://localhost:5000/tasks", {
-      method: "POST",
-
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-
-      body: JSON.stringify(newTask),
-    });
-
-    const data = await res.json();
+    const data = await createTask(newTask,token)
+    console.log("data is ",data)
 
     setTasks((prev) =>
       Array.isArray(prev)
@@ -83,7 +87,6 @@ function useTasks() {
 
     setTask("");
   };
-
   //-------------------------------------------------------------------
   // toggle task
   //------------------------------------------------------------------
@@ -94,16 +97,8 @@ function useTasks() {
       completed: !task.completed,
     };
 
-    await fetch(`http://localhost:5000/tasks/${task._id}`, {
-      method: "PUT",
+    const res= updateTask(updatedTask, token)
 
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-
-      body: JSON.stringify(updatedTask),
-    });
 
     setTasks((prev) =>
       Array.isArray(prev)
@@ -116,54 +111,49 @@ function useTasks() {
     );
   };
 
-  const deleteTask = async (id) => {
+  const removeTask = async (id) => {
 
     try {
 
-        const response = await fetch(
-            `http://localhost:5000/tasks/${id}`,
-            {
-                method: "DELETE",
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            }
-        )
+      
 
-        console.log(await response.json())
+      const response= await deleteTask(id,token)
 
-        setTasks((prev) =>
-            prev.filter((task) => task._id !== id)
-        )
+      console.log(await response)
+
+      setTasks((prev) =>
+        prev.filter((task) => task._id !== id)
+      )
 
     } catch (err) {
 
-        console.log(err)
+      console.log(err)
     }
-}
+  }
   const startEdit = (index, text) => {
     setEditingIndex(index);
     setEditText(text);
   };
 
 
-const saveEdit = async (task) => {
+  const saveEdit = async (task) => {
     const updatedTask = {
       ...task,
       text: editText,
     };
 
-    await fetch(`http://localhost:5000/tasks/${task._id}`, {
-      method: "PUT",
+    // await fetch(`http://localhost:5000/tasks/${task._id}`, {
+    //   method: "PUT",
 
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
+    //   headers: {
+    //     "Content-Type": "application/json",
+    //     Authorization: `Bearer ${token}`,
+    //   },
 
-      body: JSON.stringify(updatedTask),
-    });
-
+    //   body: JSON.stringify(updatedTask),
+    // });
+    const res= await updateTask(updatedTask, token)
+    console.log(res)
     setTasks((prev) =>
       Array.isArray(prev)
         ? prev.map((t) =>
@@ -184,8 +174,8 @@ const saveEdit = async (task) => {
     ? tasks.filter((t) => {
 
       //safety check
-      if(!t || !t.text) return false;
-      
+      if (!t || !t.text) return false;
+
       const matchesFilter =
         filter === "all" ||
         (filter === "completed" && t.completed) ||
@@ -218,7 +208,7 @@ const saveEdit = async (task) => {
 
     addTask,
     toggleTask,
-    deleteTask,
+    removeTask,
     startEdit,
     saveEdit,
 
