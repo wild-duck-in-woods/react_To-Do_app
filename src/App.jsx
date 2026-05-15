@@ -6,11 +6,19 @@ import Signup from "./components/Signup";
 function App(){
   const token =
     localStorage.getItem("token");
+  
 
-  return (
-    <>
-      {token ? <TodoApp /> : <Login />}
-    </>
-  ); 
+  return(
+    <div>
+      {token ? (
+        <TodoApp />
+      ) : (
+      <Login />
+      )}
+        
+    </div>
+
+  )
+  
 }
 export default App;

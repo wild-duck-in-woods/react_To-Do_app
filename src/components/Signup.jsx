@@ -1,36 +1,30 @@
 import { useState } from "react";
 
-function Signup({ }) {
+import {
+  signUp,
+} from "../services/api";
+function Signup({ setIsLogin}) {
     const [email, setEmail] = useState("")
     const [password, setPassword] = useState("");
 
     const signupUser = async () => {
-        const res = await fetch(
-            "http://localhost:5000/signup",
-            {
-                method: "POST",
+    try {
 
-                headers: {
-                    "Content-Type": "application/json",
-                },
+      const data= await signUp(email,password)
+      console.log(data)
 
-                body: JSON.stringify({
-                    email,
-                    password,
-                }),
-            }
-        )
-        const data = await res.json();
         alert(data.message);
 
-        if (data.message === "signup successful") {
-            setIsLogin(true);
-        }
-    };
+
+    } catch (err) {
+      console.log(err);
+    }
+  }
+
 return (
     <div className="p-10 flex flex-col gap-4 max-w-sm mx-auto">
 
-      <h1 className="text-2xl font-bold">
+      <h1 className="f">
         Signup
       </h1>
 
@@ -61,12 +55,15 @@ return (
         Signup
       </button>
 
-      <p
-        onClick={() => setIsLogin(true)}
-        className="text-blue-500 cursor-pointer"
-      >
-        Already have an account?
-      </p>
+      <p className="text-sm mt-2">
+                Already have an account?{" "}
+                <span
+                    className="text-blue-500 cursor-pointer"
+                    onClick={()=>setIsLogin(true)}
+                >
+                    Login
+                </span>
+            </p>
 
     </div>
   );
