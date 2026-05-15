@@ -66,9 +66,19 @@ function Login() {
     if (password.length < 6) {
       newErrors.password = "password must be at least 6 characters";
     }
+
+
     if (Object.keys(newErrors).length !== 0) {
+
       setErrors(newErrors);
     } else {
+
+      setLoading(true);
+      setTimeout(() => {
+        setLoading(false);
+      }, 1000);
+
+      
       const data = isLogin
         ? await loginUser()
         : await signupUser();
@@ -152,11 +162,16 @@ function Login() {
               ? "w-full bg-blue-500 text-white p-2 rounded mt-4 hover:bg-blue-800 transition duration-200"
               : "w-full bg-green-500 text-white p-2 rounded mt-4 hover:bg-green-800 transition duration-200"
           }
-        >
-          {
-            !isLogin
-              ? " Signup"
-              : " Login"
+          disabled={loading}
+
+        > {
+            loading
+              ? isLogin
+                ? "Logging in..."
+                : "Signing in..."
+              : isLogin
+                ? "Login"
+                : "Signup"
           }
         </button>
 

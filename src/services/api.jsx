@@ -1,6 +1,6 @@
 //const BASE_URL = "http://localhost:5000"
 const BASE_URL =
-   "https://todo-backend-w4ml.onrender.com"
+    "https://todo-backend-w4ml.onrender.com"
 const getAuthHeaders =
     (token) => {
 
@@ -12,6 +12,62 @@ const getAuthHeaders =
                 `Bearer ${token}`
         }
     }
+export const signUp = async (email, password) => {
+    try {
+        const res = await fetch(
+            `${BASE_URL}/signup`,
+            {
+                method: "POST",
+
+                headers: {
+                    "Content-Type": "application/json",
+                },
+
+                body: JSON.stringify({
+                    email,
+                    password,
+                }),
+            }
+        );
+        const data = await res.json();
+
+
+
+        return data;
+
+
+
+    } catch (err) {
+        console.log(err);
+    }
+}
+export const logIn = async (email, password) => {
+    try {
+        const res = await fetch(
+            `${BASE_URL}/login`,
+            {
+                method: "POST",
+
+                headers: {
+                    "Content-Type": "application/json",
+                },
+
+                body: JSON.stringify({
+                    email,
+                    password,
+                }),
+            }
+        );
+        const data = await res.json();
+
+
+        return data
+
+
+    } catch (err) {
+        console.log(err);
+    }
+}
 
 export const getTasks =
     async (token) => {
@@ -103,5 +159,7 @@ export default {
     getTasks,
     createTask,
     deleteTask,
-    updateTask
+    updateTask,
+    logIn,
+    signUp
 }
